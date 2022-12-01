@@ -16,7 +16,7 @@ public class MyThread extends Thread{
     private String message;
     private BlockingQueue<String> queue;
     private MyThreadEventListener listener = null;
-        public MyThread(MyThreadEventListener listener) throws UnknownHostException {
+        public MyThread(BlockingQueue<String> queue,MyThreadEventListener listener) throws UnknownHostException {
             this.listener = listener;
             try{
                 address = InetAddress.getByName(IP);
@@ -30,9 +30,9 @@ public class MyThread extends Thread{
             while(true){
                 try{
                     byte[] buffer = new byte[1024];
-                    DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+                    DatagramPacket packet = new DatagramPacket(buffer, buffer.length, address, PORT);
                     UDPSocket.receive(packet);
-                    message = new String(packet.getData(), 0, packet.getLength());
+                    message = new String(packet.getData());
                     listener.onEventInMyThread(message);
                 } catch (IOException e) {
                     e.printStackTrace();

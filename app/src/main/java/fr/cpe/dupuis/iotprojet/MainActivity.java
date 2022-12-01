@@ -85,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements View.OnDragListen
 
         test = (EditText) findViewById (R.id.monip);
         monport = (EditText) findViewById (R.id.monport);
-        TextView textview = (TextView) findViewById(R.id.resultat);
+        TextView textviewtemp = (TextView) findViewById(R.id.resultat);
         MyThreadEventListener listener = new MyThreadEventListener() {
             @Override
             public void onEventInMyThread(String data)
@@ -93,24 +93,18 @@ public class MainActivity extends AppCompatActivity implements View.OnDragListen
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
-                        textview.setText(data);
+                        textviewtemp.setText(data);
                     }
                 });
             }
         };
-        MyThread thread = null;
+        queue = new ArrayBlockingQueue<String>(10);
         try {
-            thread = new MyThread(listener);
+            thread = new MyThread(queue, listener);
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
-        assert thread != null;
         thread.start();
-
-
-
-
-
 
 
 //************************** OnClick listener pour le bouton de validation des parametres IP*********************//
