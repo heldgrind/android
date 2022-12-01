@@ -7,6 +7,8 @@ import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.DragEvent;
 import android.view.View;
@@ -20,6 +22,7 @@ import android.widget.Toast;
 
 import java.net.DatagramPacket;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -82,16 +85,29 @@ public class MainActivity extends AppCompatActivity implements View.OnDragListen
 
         test = (EditText) findViewById (R.id.monip);
         monport = (EditText) findViewById (R.id.monport);
-        queue=new ArrayBlockingQueue<String>(100);
-        thread=new MyThread(queue);
         TextView textview = (TextView) findViewById(R.id.resultat);
-        List<String> testList = new ArrayList<String>();
-        while (queue.size() > 0) {
-            testList.add(queue.poll());
+        MyThreadEventListener listener = new MyThreadEventListener() {
+            @Override
+            public void onEventInMyThread(String data)
+            {
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        textview.setText(data);
+                    }
+                });
+            }
+        };
+        MyThread thread = null;
+        try {
+            thread = new MyThread(listener);
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
         }
+        assert thread != null;
+        thread.start();
 
 
-        textview.setText(testList.toString());
 
 
 
@@ -129,20 +145,48 @@ public class MainActivity extends AppCompatActivity implements View.OnDragListen
                             });
 
                 test.show();
+                int nbenfant = vue2.getChildCount();
 
-               // vue1.getChildAt() renvoi le nombre d'enfant du layout
+                for (int i=0;i<nbenfant;i++) {
+                    View nextChild = vue2.getChildAt(i);
+                    nextChild.getId();  //recupere l'id de l'enfant au format android
 
-               //         boucle sur le nombre d'enfant
-               // vue1.getId() == R.id.btnDrag ; compare l'id de l'enfant a celui du boutondrag
+                    String str2 = String.valueOf(getResources().getResourceEntryName(nextChild.getId())); //recupere ID de l'element enfant en format string
+                    String idbouton = "btnDrag";
+                    String idbouton2 = "btnDrag2";
 
-               // queue.add("(T)");
-               // queue.add("(H)");
+                    if(str2.equals(idbouton)){
+
+                        Log.i("nbenfant", "Temperature");
+
+                    }else if(str2.equals(idbouton2)){
+                        Log.i("nbenfant", "Humidite");
+                    }
+                    //   Log.i("nbenfant", String.valueOf(nextChild));
+                }
+                int nbenfant3 = vue3.getChildCount();
+
+                for (int i=0;i<nbenfant3;i++) {
+                    View nextChild = vue3.getChildAt(i);
+                    nextChild.getId();  //recupere l'id de l'enfant au format android
+
+                    String str2 = String.valueOf(getResources().getResourceEntryName(nextChild.getId())); //recupere ID de l'element enfant en format string
+                    String idbouton = "btnDrag";
+                    String idbouton2 = "btnDrag2";
+
+                    if(str2.equals(idbouton)){
+
+                        Log.i("nbenfant", "Temperature");
+
+                    }else if(str2.equals(idbouton2)){
+                        Log.i("nbenfant", "Humidite");
+                    }
+                }
             }
         });
 
         //**************************  FIN   de   OnClick listener pour le bouton de validation des parametres IP*********************//
 
-        thread.start();
 
 
 }
