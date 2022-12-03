@@ -1,5 +1,7 @@
 package fr.cpe.dupuis.iotprojet;
 
+import static java.lang.Integer.parseInt;
+
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.DialogInterface;
@@ -67,22 +69,27 @@ public class MainActivity extends AppCompatActivity implements View.OnDragListen
 
         /* Partie relative à l'envoi de donnée */
         queue=new ArrayBlockingQueue<String>(100);
-        TextView textview = (TextView) findViewById(R.id.resultat);
-        textview.setText("En attente de connexion");
+        TextView temperatureTextView = (TextView) findViewById(R.id.resultat);
+        TextView humiditeTextView = (TextView) findViewById(R.id.resultat2);
+        temperatureTextView.setText("En attente de connexion");
+        humiditeTextView.setText("En attente de connexion");
         MyThreadEventListener listener = new MyThreadEventListener() {
             @Override
             public void onEventInMyThread(String message) {
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
-                        textview.setText(message);
+                        String temperature = message.split(";")[0];
+                        String humidite = message.split(";")[1];
+
+                        temperatureTextView.setText(temperature);
+                        humiditeTextView.setText(humidite);
                     }
                 });
             }
 
         };
-        Reception reception = new Reception(listener);
-        reception.start();
+
 
 
 
@@ -98,6 +105,11 @@ public class MainActivity extends AppCompatActivity implements View.OnDragListen
                 /* Initialisation des variables */
                 vue2 = (LinearLayout) findViewById (R.id.layout2);
                 vue3 = (LinearLayout) findViewById (R.id.layout3);
+                String ip = test.getText().toString();
+                String port = monport.getText().toString();
+
+                Reception reception = new Reception(listener,ip,parseInt(port));
+                reception.start();
 
                 /* POP-UP de validation */
                 AlertDialog.Builder test = new AlertDialog.Builder(activity);
@@ -112,6 +124,7 @@ public class MainActivity extends AppCompatActivity implements View.OnDragListen
                         vue3 = (LinearLayout) findViewById (R.id.layout3);
                         String idbouton = "btnDrag";
                         String idbouton2 = "btnDrag2";
+
 
                         Toast.makeText(getApplicationContext(),"Clic sur oui", Toast.LENGTH_SHORT).show();
 
