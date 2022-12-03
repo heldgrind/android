@@ -51,7 +51,6 @@
 
         </LinearLayout>
 
-        <!-- Layout 1 -->
 
         <Button
             android:id="@+id/valider"
@@ -60,7 +59,10 @@
             android:layout_gravity="center_vertical|center_horizontal"
             android:text="Valider" />
 
-        <LinearLayout android:id="@+id/layout1"
+
+
+        <!-- Layout 2 -->
+        <LinearLayout android:id="@+id/layout2"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -68,11 +70,37 @@
             android:gravity="center"
             android:orientation="vertical">
 
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="212dp"
+                android:layout_height="wrap_content"
+                android:rotationX="-7"
+                android:text="Choix 1 : " />
+
             <Button
                 android:id="@+id/btnDrag"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Température" />
+
+        </LinearLayout>
+        <!-- Layout 3 -->
+
+        <LinearLayout android:id="@+id/layout3"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="#fff"
+            android:gravity="center"
+            android:orientation="vertical">
+
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="212dp"
+                android:layout_height="wrap_content"
+                android:text="Choix 2 :" />
+
 
             <Button
                 android:id="@+id/btnDrag2"
@@ -80,49 +108,7 @@
                 android:layout_height="wrap_content"
                 android:text="Humidité" />
 
-            <Button
-                android:id="@+id/btnDrag3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Pression" />
-
-
         </LinearLayout>
-
-
-        <!-- Layout 2 -->
-    <LinearLayout android:id="@+id/layout2"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:background="#fff"
-        android:gravity="center"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/textView"
-            android:layout_width="212dp"
-            android:layout_height="wrap_content"
-            android:rotationX="-7"
-            android:text="Choix 1 : " />
-    </LinearLayout>
-    <!-- Layout 3 -->
-
-    <LinearLayout android:id="@+id/layout3"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:background="#fff"
-        android:gravity="center"
-        android:orientation="vertical">
-
-
-        <TextView
-            android:id="@+id/textView2"
-            android:layout_width="212dp"
-            android:layout_height="wrap_content"
-            android:text="Choix 2 :" />
-    </LinearLayout>
 
         <LinearLayout android:id="@+id/layout4"
             android:layout_width="match_parent"
@@ -135,6 +121,12 @@
 
             <TextView
                 android:id="@+id/resultat"
+                android:layout_width="212dp"
+                android:layout_height="wrap_content"
+                android:text="" />
+
+            <TextView
+                android:id="@+id/resultat2"
                 android:layout_width="212dp"
                 android:layout_height="wrap_content"
                 android:text="" />

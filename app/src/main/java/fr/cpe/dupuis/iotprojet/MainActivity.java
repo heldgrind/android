@@ -1,6 +1,5 @@
 package fr.cpe.dupuis.iotprojet;
 
-
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.DialogInterface;
@@ -15,14 +14,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.net.DatagramPacket;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -31,80 +28,66 @@ import java.util.concurrent.BlockingQueue;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import org.w3c.dom.Text;
-
 public class MainActivity extends AppCompatActivity implements View.OnDragListener, View.OnLongClickListener {
 
+    /* Initialisation des variables */
     EditText test;
     EditText monport;
-    LinearLayout vue1;
     LinearLayout vue2;
     LinearLayout vue3;
-    private MyThread thread;
     private BlockingQueue<String> queue;
     private MainActivity activity ;
+
+
+
+    //******************************* On Create de l'application ***************************************************//
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         this.activity = this ;
-        //Find all views and set Tag to all draggable views
 
+        /* Initialisation recuperation port et adresse serveur */
+        test = (EditText) findViewById (R.id.monip);
+        monport = (EditText) findViewById (R.id.monport);
+
+        /* Mise en place des listener pour les boutons à déplacer (Drag and drop) */
         Button btn0 = (Button) findViewById(R.id.valider);
-
         Button btn = (Button) findViewById(R.id.btnDrag);
         btn.setTag("DRAGGABLE BUTTON");
         btn.setOnLongClickListener(this);
-        //Set Drag Event Listeners for defined layouts
-        findViewById(R.id.layout1).setOnDragListener(this);
         findViewById(R.id.layout2).setOnDragListener(this);
         findViewById(R.id.layout3).setOnDragListener(this);
-        findViewById(R.id.layout3).setOnDragListener(this);
-        findViewById(R.id.layout4).setOnDragListener(this);
-
 
         Button btn2 = (Button) findViewById(R.id.btnDrag2);
         btn2.setTag("DRAGGABLE BUTTON");
         btn2.setOnLongClickListener(this);
-        //Set Drag Event Listeners for defined layouts
-        findViewById(R.id.layout1).setOnDragListener(this);
         findViewById(R.id.layout2).setOnDragListener(this);
         findViewById(R.id.layout3).setOnDragListener(this);
-        findViewById(R.id.layout3).setOnDragListener(this);
-        findViewById(R.id.layout4).setOnDragListener(this);
 
-        Button btn3 = (Button) findViewById(R.id.btnDrag3);
-        btn3.setTag("DRAGGABLE BUTTON");
-        btn3.setOnLongClickListener(this);
-        //Set Drag Event Listeners for defined layouts
-        findViewById(R.id.layout1).setOnDragListener(this);
-        findViewById(R.id.layout2).setOnDragListener(this);
-        findViewById(R.id.layout3).setOnDragListener(this);
-        findViewById(R.id.layout3).setOnDragListener(this);
-        findViewById(R.id.layout4).setOnDragListener(this);
-
-        test = (EditText) findViewById (R.id.monip);
-        monport = (EditText) findViewById (R.id.monport);
-        TextView textviewtemp = (TextView) findViewById(R.id.resultat);
+        /* Partie relative à l'envoi de donnée */
+        queue=new ArrayBlockingQueue<String>(100);
+        TextView textview = (TextView) findViewById(R.id.resultat);
+        textview.setText("En attente de connexion");
         MyThreadEventListener listener = new MyThreadEventListener() {
             @Override
-            public void onEventInMyThread(String data)
-            {
+            public void onEventInMyThread(String message) {
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
-                        textviewtemp.setText(data);
+                        textview.setText(message);
                     }
                 });
             }
+
         };
-        queue = new ArrayBlockingQueue<String>(10);
-        try {
-            thread = new MyThread(queue, listener);
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
-        thread.start();
+        Reception reception = new Reception(listener);
+        reception.start();
+
+
+
+        //**************************  Fin du On Create de l'application ***************************************************//
+
 
 
 //************************** OnClick listener pour le bouton de validation des parametres IP*********************//
@@ -112,70 +95,76 @@ public class MainActivity extends AppCompatActivity implements View.OnDragListen
         btn0.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
 
-                // Code here executes on main thread after user presses button
-
-
-
-                vue1 = (LinearLayout) findViewById (R.id.layout1);
+                /* Initialisation des variables */
                 vue2 = (LinearLayout) findViewById (R.id.layout2);
                 vue3 = (LinearLayout) findViewById (R.id.layout3);
 
+                /* POP-UP de validation */
                 AlertDialog.Builder test = new AlertDialog.Builder(activity);
-                             test.setTitle("Attention");
-                            test.setMessage ("Voulez-vous valider ces paramètres ?");
-                            test.setPositiveButton( "oui",new DialogInterface.OnClickListener(){
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                Toast.makeText(getApplicationContext(),"Clic sur oui", Toast.LENGTH_SHORT).show();
+                test.setTitle("Attention");
+                test.setMessage ("Voulez-vous valider ces paramètres ?");
+                test.setPositiveButton( "oui",new DialogInterface.OnClickListener(){
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                        /* Initialisation des variables */
+                        vue2 = (LinearLayout) findViewById (R.id.layout2);
+                        vue3 = (LinearLayout) findViewById (R.id.layout3);
+                        String idbouton = "btnDrag";
+                        String idbouton2 = "btnDrag2";
+
+                        Toast.makeText(getApplicationContext(),"Clic sur oui", Toast.LENGTH_SHORT).show();
+
+                        /*@corentin try and catch sur la co au serveur, si fonctionne on fait le code juste en dessous, sinon rien */
+
+                        /*try*/
+                        /*  Récupération  enfants  layout2 pour verifier  button qu'il contient et renvoyer la valeur associée vers le serveur */
+                        int nbenfant2 = vue2.getChildCount();
+                        for (int k=0;k<nbenfant2;k++) {
+                            View nextChild = vue2.getChildAt(k);
+                            String str2 = String.valueOf(getResources().getResourceEntryName(nextChild.getId()));
+                            if(str2.equals(idbouton)){
+                                /* Partie relative à l'envoi de donnée */
+                                //@Corentin envoi de la lettre T en premier caractere vers le serveur
+                                Log.i("valeurchoix1", "Temperature");
+                            }else if(str2.equals(idbouton2)){
+                                /* Partie relative à l'envoi de donnée */
+                                //@Corentin envoi de la lettre H en premier caractere vers le serveur
+                                Log.i("valeurchoix1", "Humidite");
                             }
-                        });
+                        }
 
-                            test.setNegativeButton("non", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    Toast.makeText(getApplicationContext(),"Non", Toast.LENGTH_SHORT).show();
+                        /*  Récupération  enfants  layout3 pour verifier  button qu'il contient et renvoyer la valeur associée vers le serveur */
+                        int nbenfant3 = vue3.getChildCount();
+                        for (int j=0;j<nbenfant3;j++) {
+                            View nextChild = vue3.getChildAt(j);
+                            nextChild.getId();
+                            String str2 = String.valueOf(getResources().getResourceEntryName(nextChild.getId()));
 
-                                }
-                            });
+                            if(str2.equals(idbouton)){
+                                /* Partie relative à l'envoi de donnée */
+                                //@Corentin envoi de la lettre T en deuxieme caractere vers le serveur
+                                Log.i("valeurchoix2", "Temperature");
+                            }else if(str2.equals(idbouton2)){
+                                /* Partie relative à l'envoi de donnée */
+                                //@Corentin envoi de la lettre H en deuxieme caractere vers le serveur
+                                Log.i("valeurchoix2", "Humidite");
+                            }
+                        }
 
+                        /* fin du try*/
+                        /* catch*/
+                        //** erreur serveur//
+                    }
+                });
+                test.setNegativeButton("non", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Toast.makeText(getApplicationContext(),"Non", Toast.LENGTH_SHORT).show();
+                    }
+                });
                 test.show();
-                int nbenfant = vue2.getChildCount();
-
-                for (int i=0;i<nbenfant;i++) {
-                    View nextChild = vue2.getChildAt(i);
-                    nextChild.getId();  //recupere l'id de l'enfant au format android
-
-                    String str2 = String.valueOf(getResources().getResourceEntryName(nextChild.getId())); //recupere ID de l'element enfant en format string
-                    String idbouton = "btnDrag";
-                    String idbouton2 = "btnDrag2";
-
-                    if(str2.equals(idbouton)){
-
-                        Log.i("nbenfant", "Temperature");
-
-                    }else if(str2.equals(idbouton2)){
-                        Log.i("nbenfant", "Humidite");
-                    }
-                    //   Log.i("nbenfant", String.valueOf(nextChild));
-                }
-                int nbenfant3 = vue3.getChildCount();
-
-                for (int i=0;i<nbenfant3;i++) {
-                    View nextChild = vue3.getChildAt(i);
-                    nextChild.getId();  //recupere l'id de l'enfant au format android
-
-                    String str2 = String.valueOf(getResources().getResourceEntryName(nextChild.getId())); //recupere ID de l'element enfant en format string
-                    String idbouton = "btnDrag";
-                    String idbouton2 = "btnDrag2";
-
-                    if(str2.equals(idbouton)){
-
-                        Log.i("nbenfant", "Temperature");
-
-                    }else if(str2.equals(idbouton2)){
-                        Log.i("nbenfant", "Humidite");
-                    }
-                }
+                /*  FIN de POP-UP de validation */
             }
         });
 
@@ -183,108 +172,150 @@ public class MainActivity extends AppCompatActivity implements View.OnDragListen
 
 
 
-}
+    }
+
+    //**************************  Drag and drop *************************************************************************************//
     @Override
     public boolean onLongClick(View v) {
-        // Create a new ClipData.Item from the ImageView object's tag
         ClipData.Item item = new ClipData.Item((CharSequence) v.getTag());
-        // Create a new ClipData using the tag as a label, the plain text MIME type, and
-        // the already-created item. This will create a new ClipDescription object within the
-        // ClipData, and set its MIME type entry to "text/plain"
         String[] mimeTypes = {ClipDescription.MIMETYPE_TEXT_PLAIN};
         ClipData data = new ClipData(v.getTag().toString(), mimeTypes, item);
-        // Instantiates the drag shadow builder.
         View.DragShadowBuilder dragshadow = new View.DragShadowBuilder(v);
-        // Starts the drag
-        v.startDrag(data        // data to be dragged
-                , dragshadow   // drag shadow builder
-                , v           // local data about the drag and drop operation
-                , 0          // flags (not currently used, set to 0)
+        v.startDrag(data
+                , dragshadow
+                , v
+                , 0
         );
         return true;
     }
-    // This is the method that the system calls when it dispatches a drag event to the listener.
+
     @Override
     public boolean onDrag(View v, DragEvent event) {
-        // Defines a variable to store the action type for the incoming event
+
+        /* Initialisation des variables */
+        boolean presenceBoutonDansView3 =false;
+        boolean presenceBoutonDansView2=false;
+        String idbouton = "btnDrag";
+        String idbouton2 = "btnDrag2";
+        String layout2string = "layout2";
+        String layout3string = "layout3";
+        Button btn = (Button) findViewById(R.id.btnDrag);
+        Button btn2 = (Button) findViewById(R.id.btnDrag2);
+        String lelayout2 = "layout2";
+        String lelayout3 = "layout3";
+        vue2 = (LinearLayout) findViewById (R.id.layout2);
+        vue3 = (LinearLayout) findViewById (R.id.layout3);
+
         int action = event.getAction();
-        // Handles each of the expected events
+
         switch (action) {
 
             case DragEvent.ACTION_DRAG_STARTED:
-                // Determines if this View can accept the dragged data
+                // Verifie si la vue peux supporter un drag du button
                 if (event.getClipDescription().hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN)) {
-                    // if you want to apply color when drag started to your view you can uncomment below lines
-                    // to give any color tint to the View to indicate that it can accept data.
-                    // v.getBackground().setColorFilter(Color.BLUE, PorterDuff.Mode.SRC_IN);
-                    // Invalidate the view to force a redraw in the new tint
-                    //  v.invalidate();
-                    // returns true to indicate that the View can accept the dragged data.
                     return true;
                 }
-                // Returns false. During the current drag and drop operation, this View will
-                // not receive events again until ACTION_DRAG_ENDED is sent.
                 return false;
 
             case DragEvent.ACTION_DRAG_ENTERED:
-                // Applies a GRAY or any color tint to the View. Return true; the return value is ignored.
                 v.getBackground().setColorFilter(Color.GRAY, PorterDuff.Mode.SRC_IN);
-                // Invalidate the view to force a redraw in the new tint
                 v.invalidate();
                 return true;
 
             case DragEvent.ACTION_DRAG_LOCATION:
-                // Ignore the event
                 return true;
 
             case DragEvent.ACTION_DRAG_EXITED:
-                // Re-sets the color tint to blue. Returns true; the return value is ignored.
-                // view.getBackground().setColorFilter(Color.BLUE, PorterDuff.Mode.SRC_IN);
-                //It will clear a color filter .
                 v.getBackground().clearColorFilter();
-                // Invalidate the view to force a redraw in the new tint
                 v.invalidate();
                 return true;
 
             case DragEvent.ACTION_DROP:
-                // Gets the item containing the dragged data
-                ClipData.Item item = event.getClipData().getItemAt(0);
-                // Gets the text data from the item.
-                String dragData = item.getText().toString();
-                // Displays a message containing the dragged data.
-                Toast.makeText(this, "Dragged data is " + dragData, Toast.LENGTH_SHORT).show();
-                // Turns off any color tints
+                /* Initialisation des variables */
                 v.getBackground().clearColorFilter();
-                // Invalidates the view to force a redraw
                 v.invalidate();
-
                 View vw = (View) event.getLocalState();
                 ViewGroup owner = (ViewGroup) vw.getParent();
-                owner.removeView(vw); //remove the dragged view
-                //caste the view into LinearLayout as our drag acceptable layout is LinearLayout
+                owner.removeView(vw);
                 LinearLayout container = (LinearLayout) v;
-                container.addView(vw);//Add the dragged view
-                vw.setVisibility(View.VISIBLE);//finally set Visibility to VISIBLE
-                // Returns true. DragEvent.getResult() will return true.
+
+                //  vw correspond au button drag and drop
+                //  owner correspond au layout source
+                //  container correspond au layout destination
+
+                String IDlayoutdest = String.valueOf(getResources().getResourceEntryName(owner.getId()));
+
+                /* glisser un bouton de layout 2 vers 3 avec inversion des deux boutons */
+                if((IDlayoutdest.equals(layout2string))){
+
+                    int nbenfant3 = vue3.getChildCount();
+
+                    for (int j=0;j<nbenfant3;j++) {
+                        View nextChild = vue3.getChildAt(j);
+                        nextChild.getId();
+                        String str2 = String.valueOf(getResources().getResourceEntryName(nextChild.getId()));
+
+                        if(str2.equals(idbouton)){
+                            Log.i("debug", "debug2");
+                            ViewGroup layout = (ViewGroup) btn.getParent();
+                            layout.removeView(btn);
+                            container.addView(vw);
+                            vw.setVisibility(View.VISIBLE);
+                            owner.addView(btn);
+
+                        }else if(str2.equals(idbouton2)){
+                            Log.i("debug", "debug1");
+                            ViewGroup layout = (ViewGroup) btn2.getParent();
+                            layout.removeView(btn2);
+                            container.addView(vw);
+                            vw.setVisibility(View.VISIBLE);
+                            owner.addView(btn2);
+                        }
+                    }
+
+                    /* glisser un bouton de layout 3 vers 2  avec inversion des deux boutons */
+                }else if ((IDlayoutdest.equals(layout3string))){
+
+
+                    int nbenfant = vue2.getChildCount();
+                    for (int k=0;k<nbenfant;k++) {
+                        View nextChild = vue2.getChildAt(k);
+                        String str2 = String.valueOf(getResources().getResourceEntryName(nextChild.getId()));
+                        if(str2.equals(idbouton)){
+                            Log.i("debug", "debug2");
+                            ViewGroup layout = (ViewGroup) btn.getParent();
+                            layout.removeView(btn);
+                            container.addView(vw);
+                            vw.setVisibility(View.VISIBLE);
+                            owner.addView(btn);
+
+                        }else if(str2.equals(idbouton2)){
+                            Log.i("debug", "debug1");
+                            ViewGroup layout = (ViewGroup) btn2.getParent();
+                            layout.removeView(btn2);
+                            container.addView(vw);
+                            vw.setVisibility(View.VISIBLE);
+                            owner.addView(btn2);
+
+                        }
+
+                    }
+
+                }
                 return true;
 
             case DragEvent.ACTION_DRAG_ENDED:
-                // Turns off any color tinting
                 v.getBackground().clearColorFilter();
-                // Invalidates the view to force a redraw
                 v.invalidate();
-                // Does a getResult(), and displays what happened.
-                if (event.getResult())
-                    Toast.makeText(this, "The drop was handled.", Toast.LENGTH_SHORT).show();
-                else
-                    Toast.makeText(this, "The drop didn't work.", Toast.LENGTH_SHORT).show();
-                // returns true; the value is ignored.
+
                 return true;
-            // An unknown action type was received.
+
             default:
-                Log.e("DragDrop Example", "Unknown action type received by OnDragListener.");
+                Log.e("DragDrop", "Un probleme est survenu sur le drag.");
                 break;
         }
         return false;
     }
+
+    //**************************  Fin Drag and drop *************************************************************************************//
 }
