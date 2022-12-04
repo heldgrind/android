@@ -33,14 +33,14 @@ public class Envoi extends Thread {
     public void run() {
        String message = null;
         try {
-            message=queue.take();
+            message=queue.take(); // Récupération du message à envoyer
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        byte[] data = message.getBytes();
+        byte[] data = message.getBytes(); // Conversion du message en tableau de bytes
         DatagramPacket socket = new DatagramPacket(data, data.length, adresse, port);
         try {
-            UDPSocket.send(socket);
+            UDPSocket.send(socket); // envoi HT ou TH en fonction de la position
         } catch (IOException e) {
             e.printStackTrace();
         }

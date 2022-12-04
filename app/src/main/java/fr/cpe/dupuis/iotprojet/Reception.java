@@ -31,8 +31,8 @@ public class Reception extends Thread {
         this.port = port;
         try {
             adresse = InetAddress.getByName(IP);
-            UDPSocket = new DatagramSocket();
-            UDPSocket.setSoTimeout(2000);
+            UDPSocket = new DatagramSocket(); // create a socket
+            UDPSocket.setSoTimeout(2000); // set a timeout of 2 seconds
         } catch (SocketException | UnknownHostException e) {
             e.printStackTrace();
         }
@@ -41,24 +41,24 @@ public class Reception extends Thread {
 
     public void run(){
 
-    Envoi envoi = new Envoi(listener,IP,port,queue);
+    Envoi envoi = new Envoi(listener,IP,port,queue); // Création d'un thread d'envoi
     envoi.start();
 
         while (true) {
 
             try {
-                sleep(2000);
+                sleep(2000); // Pause de 2 secondes évite le spam
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
 
-            byte[] autorisation = "getValues()".getBytes(StandardCharsets.UTF_8);
-            DatagramPacket packet2 = new DatagramPacket(autorisation, autorisation.length, adresse, port);
+            byte[] autorisation = "getValues()".getBytes(StandardCharsets.UTF_8); // getValues() est la commande envoyée au serveur pour obtenir les valeurs des capteurs
+            DatagramPacket packet2 = new DatagramPacket(autorisation, autorisation.length, adresse, port); // Création du paquet à envoyer
 
             try {
                 sleep(2000);
                 if (UDPSocket != null) {
-                    UDPSocket.send(packet2);
+                    UDPSocket.send(packet2); // Envoi du paquet
                 }
 
                 sleep(10);
@@ -66,14 +66,14 @@ public class Reception extends Thread {
 
 
                     byte[] data = new byte[1024];
-                    DatagramPacket packet = new DatagramPacket(data, data.length);
+                    DatagramPacket packet = new DatagramPacket(data, data.length); // Création du paquet à recevoir
 
                     if (UDPSocket != null) {
-                        UDPSocket.receive(packet);
+                        UDPSocket.receive(packet); // Réception du paquet
                     }
                     size = packet.getLength();
 
-                    if (size > 0) {
+                    if (size > 0) { // Si le paquet reçu n'est pas vide
                         listener.onEventInMyThread(new String(data, 0, size));
                     }
 

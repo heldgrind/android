@@ -73,22 +73,22 @@ public class MainActivity extends AppCompatActivity implements View.OnDragListen
         findViewById(R.id.layout3).setOnDragListener(this);
 
         /* Partie relative à l'envoi de donnée */
-        queue=new ArrayBlockingQueue<String>(100);
+        queue=new ArrayBlockingQueue<String>(100); // Création de la file d'attente
         TextView temperatureTextView = (TextView) findViewById(R.id.resultat);
         TextView humiditeTextView = (TextView) findViewById(R.id.resultat2);
         temperatureTextView.setText("En attente de connexion");
         humiditeTextView.setText("En attente de connexion");
-        MyThreadEventListener listener = new MyThreadEventListener() {
+        MyThreadEventListener listener = new MyThreadEventListener() { // Création d'un listener pour récupérer les données reçues
             @Override
             public void onEventInMyThread(String message) {
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
-                        String temperature = message.split(";")[0];
-                        String humidite = message.split(";")[1];
+                        String temperature = message.split(";")[0]; // Récupération de la température
+                        String humidite = message.split(";")[1]; // Récupération de l'humidité
 
-                        temperatureTextView.setText(temperature);
-                        humiditeTextView.setText(humidite);
+                        temperatureTextView.setText(temperature);// Affichage de la température
+                        humiditeTextView.setText(humidite);// Affichage de l'humidité
                     }
                 });
             }
@@ -110,15 +110,15 @@ public class MainActivity extends AppCompatActivity implements View.OnDragListen
                 /* Initialisation des variables */
                 vue2 = (LinearLayout) findViewById (R.id.layout2);
                 vue3 = (LinearLayout) findViewById (R.id.layout3);
-                String ip = test.getText().toString();
-                String port = monport.getText().toString();
+                String ip = test.getText().toString(); // Récupération de l'adresse IP
+                String port = monport.getText().toString(); // Récupération du port
 
 
                 /* Verification des champs */
 
 
 
-                Reception reception = new Reception(listener, ip, parseInt(port), queue);
+                Reception reception = new Reception(listener, ip, parseInt(port), queue); // Création de la classe de réception
 
 
 
@@ -136,7 +136,6 @@ public class MainActivity extends AppCompatActivity implements View.OnDragListen
                         String idbouton = "btnDrag";
                         String idbouton2 = "btnDrag2";
 
-                        Toast.makeText(getApplicationContext(),"Clic sur oui", Toast.LENGTH_SHORT).show();
 
                         /*@corentin try and catch sur la co au serveur, si fonctionne on fait le code juste en dessous, sinon rien */
 
@@ -149,12 +148,12 @@ public class MainActivity extends AppCompatActivity implements View.OnDragListen
                             if(str2.equals(idbouton)){
                                 /* Partie relative à l'envoi de donnée */
                                 //@Corentin envoi de la lettre T en premier caractere vers le serveur
-                                queue.add("TH");
+                                queue.add("TH"); // si la température position 1 envoie TH
                                 Log.i("valeurchoix1", "Temperature");
                             }else if(str2.equals(idbouton2)){
                                 /* Partie relative à l'envoi de donnée */
                                 //@Corentin envoi de la lettre H en premier caractere vers le serveur
-                                queue.add("HT");
+                                queue.add("HT"); // si l'humidité position 1 envoie HT
                                 Log.i("valeurchoix1", "Humidite");
                             }
                         }
@@ -169,13 +168,11 @@ public class MainActivity extends AppCompatActivity implements View.OnDragListen
                             if(str2.equals(idbouton)){
                                 /* Partie relative à l'envoi de donnée */
                                 //@Corentin envoi de la lettre T en deuxieme caractere vers le serveur
-                                queue.add("HT");
 
                                 Log.i("valeurchoix2", "Temperature");
                             }else if(str2.equals(idbouton2)){
                                 /* Partie relative à l'envoi de donnée */
                                 //@Corentin envoi de la lettre H en deuxieme caractere vers le serveur
-                                queue.add("TH");
 
                                 Log.i("valeurchoix2", "Humidite");
                             }
@@ -183,6 +180,7 @@ public class MainActivity extends AppCompatActivity implements View.OnDragListen
                         /* fin du try*/
                         /* catch*/
                         //** erreur serveur//
+                        reception.start(); // lancement du thread de reception
                     }
                 });
                 test.setNegativeButton("non", new DialogInterface.OnClickListener() {
@@ -196,7 +194,7 @@ public class MainActivity extends AppCompatActivity implements View.OnDragListen
 
 
 
-                reception.start();
+
 
 
             }
