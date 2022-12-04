@@ -169,11 +169,13 @@ public class MainActivity extends AppCompatActivity implements View.OnDragListen
                             if(str2.equals(idbouton)){
                                 /* Partie relative à l'envoi de donnée */
                                 //@Corentin envoi de la lettre T en deuxieme caractere vers le serveur
+                                queue.add("HT");
 
                                 Log.i("valeurchoix2", "Temperature");
                             }else if(str2.equals(idbouton2)){
                                 /* Partie relative à l'envoi de donnée */
                                 //@Corentin envoi de la lettre H en deuxieme caractere vers le serveur
+                                queue.add("TH");
 
                                 Log.i("valeurchoix2", "Humidite");
                             }

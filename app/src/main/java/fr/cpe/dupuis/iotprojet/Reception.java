@@ -41,11 +41,16 @@ public class Reception extends Thread {
 
     public void run(){
 
-
+    Envoi envoi = new Envoi(listener,IP,port,queue);
+    envoi.start();
 
         while (true) {
 
-
+            try {
+                sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
             byte[] autorisation = "getValues()".getBytes(StandardCharsets.UTF_8);
             DatagramPacket packet2 = new DatagramPacket(autorisation, autorisation.length, adresse, port);
@@ -83,25 +88,6 @@ public class Reception extends Thread {
                 e.printStackTrace();
             }
 
-
-            String message = null;
-            try {
-                message = queue.take();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-            byte[] data = message.getBytes(StandardCharsets.UTF_8);
-
-            DatagramPacket packetenvoiparam = new DatagramPacket(data, data.length, adresse, port);
-
-            try {
-                UDPSocket.send(packetenvoiparam);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
         }
     }
 }
-
