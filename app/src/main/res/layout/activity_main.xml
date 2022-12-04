@@ -130,12 +130,7 @@
             android:layout_weight="1"
             android:background="#fff"
             android:gravity="center"
-            android:orientation="vertical">
-
-
-
-
-        </LinearLayout>
+            android:orientation="vertical"/>
 
     </LinearLayout>
 

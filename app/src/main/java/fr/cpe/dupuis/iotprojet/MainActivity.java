@@ -1,5 +1,6 @@
 package fr.cpe.dupuis.iotprojet;
 
+
 import static java.lang.Integer.parseInt;
 
 import android.content.ClipData;
@@ -30,15 +31,19 @@ import java.util.concurrent.BlockingQueue;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import fr.cpe.dupuis.iotprojet.MyThreadEventListener;
+
 public class MainActivity extends AppCompatActivity implements View.OnDragListener, View.OnLongClickListener {
 
     /* Initialisation des variables */
+    private Thread thread;
     EditText test;
     EditText monport;
     LinearLayout vue2;
     LinearLayout vue3;
     private BlockingQueue<String> queue;
     private MainActivity activity ;
+
 
 
 
@@ -108,8 +113,14 @@ public class MainActivity extends AppCompatActivity implements View.OnDragListen
                 String ip = test.getText().toString();
                 String port = monport.getText().toString();
 
-                Reception reception = new Reception(listener,ip,parseInt(port));
-                reception.start();
+
+                /* Verification des champs */
+
+
+
+                Reception reception = new Reception(listener, ip, parseInt(port), queue);
+
+
 
                 /* POP-UP de validation */
                 AlertDialog.Builder test = new AlertDialog.Builder(activity);
@@ -125,7 +136,6 @@ public class MainActivity extends AppCompatActivity implements View.OnDragListen
                         String idbouton = "btnDrag";
                         String idbouton2 = "btnDrag2";
 
-
                         Toast.makeText(getApplicationContext(),"Clic sur oui", Toast.LENGTH_SHORT).show();
 
                         /*@corentin try and catch sur la co au serveur, si fonctionne on fait le code juste en dessous, sinon rien */
@@ -139,10 +149,12 @@ public class MainActivity extends AppCompatActivity implements View.OnDragListen
                             if(str2.equals(idbouton)){
                                 /* Partie relative à l'envoi de donnée */
                                 //@Corentin envoi de la lettre T en premier caractere vers le serveur
+                                queue.add("TH");
                                 Log.i("valeurchoix1", "Temperature");
                             }else if(str2.equals(idbouton2)){
                                 /* Partie relative à l'envoi de donnée */
                                 //@Corentin envoi de la lettre H en premier caractere vers le serveur
+                                queue.add("HT");
                                 Log.i("valeurchoix1", "Humidite");
                             }
                         }
@@ -157,14 +169,15 @@ public class MainActivity extends AppCompatActivity implements View.OnDragListen
                             if(str2.equals(idbouton)){
                                 /* Partie relative à l'envoi de donnée */
                                 //@Corentin envoi de la lettre T en deuxieme caractere vers le serveur
+
                                 Log.i("valeurchoix2", "Temperature");
                             }else if(str2.equals(idbouton2)){
                                 /* Partie relative à l'envoi de donnée */
                                 //@Corentin envoi de la lettre H en deuxieme caractere vers le serveur
+
                                 Log.i("valeurchoix2", "Humidite");
                             }
                         }
-
                         /* fin du try*/
                         /* catch*/
                         //** erreur serveur//
@@ -178,14 +191,30 @@ public class MainActivity extends AppCompatActivity implements View.OnDragListen
                 });
                 test.show();
                 /*  FIN de POP-UP de validation */
+
+
+
+                reception.start();
+
+
             }
+
+
         });
 
         //**************************  FIN   de   OnClick listener pour le bouton de validation des parametres IP*********************//
 
 
-
     }
+
+
+
+
+
+
+
+
+
 
     //**************************  Drag and drop *************************************************************************************//
     @Override
@@ -205,6 +234,8 @@ public class MainActivity extends AppCompatActivity implements View.OnDragListen
     @Override
     public boolean onDrag(View v, DragEvent event) {
 
+        Log.i("DRAG", "onDrag: " + event.getAction());
+
         /* Initialisation des variables */
         boolean presenceBoutonDansView3 =false;
         boolean presenceBoutonDansView2=false;
@@ -220,6 +251,8 @@ public class MainActivity extends AppCompatActivity implements View.OnDragListen
         vue3 = (LinearLayout) findViewById (R.id.layout3);
 
         int action = event.getAction();
+
+
 
         switch (action) {
 
@@ -239,6 +272,8 @@ public class MainActivity extends AppCompatActivity implements View.OnDragListen
                 return true;
 
             case DragEvent.ACTION_DRAG_EXITED:
+
+            case DragEvent.ACTION_DRAG_ENDED:
                 v.getBackground().clearColorFilter();
                 v.invalidate();
                 return true;
@@ -315,11 +350,7 @@ public class MainActivity extends AppCompatActivity implements View.OnDragListen
                     }
 
                 }
-                return true;
 
-            case DragEvent.ACTION_DRAG_ENDED:
-                v.getBackground().clearColorFilter();
-                v.invalidate();
 
                 return true;
 
@@ -327,6 +358,14 @@ public class MainActivity extends AppCompatActivity implements View.OnDragListen
                 Log.e("DragDrop", "Un probleme est survenu sur le drag.");
                 break;
         }
+
+
+
+
+
+
+
+
         return false;
     }
 
