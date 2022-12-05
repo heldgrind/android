@@ -76,8 +76,8 @@ public class MainActivity extends AppCompatActivity implements View.OnDragListen
         queue=new ArrayBlockingQueue<String>(100); // Création de la file d'attente
         TextView temperatureTextView = (TextView) findViewById(R.id.resultat);
         TextView humiditeTextView = (TextView) findViewById(R.id.resultat2);
-        temperatureTextView.setText("En attente de connexion");
-        humiditeTextView.setText("En attente de connexion");
+        temperatureTextView.setText(" Waiting...");
+        humiditeTextView.setText(" Waiting...");
         MyThreadEventListener listener = new MyThreadEventListener() { // Création d'un listener pour récupérer les données reçues
             @Override
             public void onEventInMyThread(String message) {
@@ -86,6 +86,10 @@ public class MainActivity extends AppCompatActivity implements View.OnDragListen
                     public void run() {
                         String temperature = message.split(";")[0]; // Récupération de la température
                         String humidite = message.split(";")[1]; // Récupération de l'humidité
+                        temperature = temperature.split(":")[1]; // Récupération de la température
+                        temperature = temperature.substring(0, temperature.length() - 2) + "°C"; // Récupération de la température
+                        humidite = humidite.split(":")[1]; // Récupération de l'humidité
+                        humidite = humidite.substring(0, humidite.length() - 2) + "%"; // Récupération de l'humidité
 
                         temperatureTextView.setText(temperature);// Affichage de la température
                         humiditeTextView.setText(humidite);// Affichage de l'humidité
